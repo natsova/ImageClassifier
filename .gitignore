@@ -1,0 +1,25 @@
+# Temporary downloads
+datasets/*/temp_download/
+
+# Python cache and compiled files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Jupyter checkpoints
+.ipynb_checkpoints/
+
+# OS / Editor files
+.DS_Store
+Thumbs.db
+
+# VS Code settings
+.vscode/
+
+# Other temporary files
+*.log
+
+# Backup files
+*~
+*.py~
