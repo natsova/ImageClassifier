@@ -20,11 +20,6 @@ from pathlib import Path
 from interface_adapters.logging.python_logger import PythonLogger
 from interface_adapters.repositories.model_repo_fs import ModelRepositoryFS
 
-logger = PythonLogger(name="model_repo")
-model_repo = ModelRepositoryFS(
-    base_path=Path("models"),
-    logger=logger
-)
 
 class Container:
     """Dependency injection container."""
@@ -36,6 +31,7 @@ class Container:
         self.logger = PythonLogger(name="container")
 
         # Repositories
+        # Manages reading/writing dataset images on disk
         self.image_repo = DatasetRepositoryFS(
             base_path=config.dataset_path,
             logger=self.logger
@@ -45,23 +41,29 @@ class Container:
             logger=self.logger
         )
 
-        # Adapters
+        # Adapters (interfaces to external systems)
         self.downloader = BingDownloader(
             logger=self.logger,
             sleep_time=config.sleep_time,
             timeout=config.download_timeout
         )
-        self.processor = ImageProcessorPillow(logger=self.logger)
+        self.processor = ImageProcessorPillow(logger=self.logger) # Handles image resizing, format conversion, etc. 
 
         # Services
+        # Contain business logic and act as an intermediary between repositories and use cases.
         self.dataset_service = DatasetService(self.image_repo)
         self.model_service = ModelService(self.model_repo)
 
-        # lazy-loaded
-        self._dataloader = None
-        self._model_adapter = None
+        # Lazy-loaded / lazy initialisation
+        '''
+        Instance variables of the Container class. "None" indicates that the object doesn’t exist yet.
+        Avoids expensive operations until they’re actually needed.
+        Underscore means "private, don’t access directly outside the class" - use getter methods to access.
+        '''
+        self._dataloader = None    # Will eventually hold a FastAIDataLoader object.
+        self._model_adapter = None    # Will eventually hold a FastAIModelAdapter object.
 
-        # Use cases
+        # Use case
         self.prepare_dataset_uc = PrepareDatasetUseCase(
             dataset_service=self.dataset_service,
             repository=self.image_repo,
@@ -69,21 +71,20 @@ class Container:
             processor=self.processor,
             logger=self.logger
         )
-
+        # Use case
         self.validate_dataset_uc = ValidateDatasetUseCase(
             dataset_service=self.dataset_service,
             processor=self.processor,
             logger=self.logger
         )
-
-        # Important: DO NOT create a model yet
+        # Use case
         self.train_model_uc = TrainModelUseCase(
             model_service=self.model_service,
             dataloader_factory=self.get_dataloader,
             model_adapter_factory=self.get_model_adapter,
             logger=self.logger
         )
-
+        # Use case
         self.predict_image_uc = PredictImageUseCase(
             model=self.get_model_adapter(),
             processor=self.processor,
@@ -93,7 +94,7 @@ class Container:
     def get_dataloader(self) -> FastAIDataLoader:
         """Lazy load dataloader."""
         if self._dataloader is None:
-            self._dataloader = FastAIDataLoader(self.config.dataset_path)
+            self._dataloader = FastAIDataLoader(self.config.dataset_path) # Create object
         return self._dataloader
     
     def get_model_adapter(self) -> FastAIModelAdapter:
@@ -105,5 +106,5 @@ class Container:
                 valid_pct=self.config.valid_pct,
                 resize_size=self.config.resize_size
             )
-            self._model_adapter = FastAIModelAdapter(dls)
+            self._model_adapter = FastAIModelAdapter(dls)    # Create object
         return self._model_adapter

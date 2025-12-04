@@ -1,38 +1,29 @@
 # ============================================================
 # frameworks/scripts/main.py
+# To run:   python3 -m frameworks.scripts.main
 # ============================================================
 """Main entry point for image classifier workflow."""
 
-from pathlib import Path
+#from pathlib import Path
 from frameworks.config.app_config import AppConfig
 from frameworks.di.container import Container
-from collections import Counter
+#from collections import Counter
 
 
 def main():
-    print("="*70)
-    print("IMAGE CLASSIFIER - CLEAN ARCHITECTURE")
-    print("="*70)
+    print("Starting Image Classifier")
     print()
 
-    # 1. Initialize configuration
-    config = AppConfig(
-        categories=["sky", "ocean", "umbrella", "dog", "book"],
-        images_per_category=150,
-        images_per_search=50,
-        epochs=10,
-        batch_size=32,
-        resize_size=192,
-        valid_pct=0.2,
-        architecture="resnet18",
-        model_path=Path("models/classifier.pkl")
-    )
+    # 1. Initialise configuration
+    config = AppConfig()
 
     print(f"Dataset path: {config.dataset_path}")
     print(f"Categories: {', '.join(config.categories)}")
     print(f"Target: {config.images_per_category} images per category\n")
 
-    # 2. Create dependency injection container
+    # 2. Create dependency injection container (factory that knows what depends on what).
+    # Wires dependencies (repositories, services, use cases) so that you can 
+    # just call methods on the container without manually constructing each dependency.
     container = Container(config)
 
     # 3. Prepare dataset
@@ -73,10 +64,10 @@ def main():
     )
 
     stats = dataloader.check_dataloader(dls)
-    print(f"✅ Total image files: {stats['total_files']}")
-    print(f"✅ Train dataset size: {stats['train_size']}")
-    print(f"✅ Validation dataset size: {stats['valid_size']}")
-    print(f"✅ Categories: {', '.join(stats['vocab'])}\n")
+    print(f"Total image files: {stats['total_files']}")
+    print(f"Train dataset size: {stats['train_size']}")
+    print(f"Validation dataset size: {stats['valid_size']}")
+    print(f"Categories: {', '.join(stats['vocab'])}\n")
 
     # 6. Build model
     print("STEP 4: Building model...")

@@ -15,6 +15,17 @@ import json
 class AppConfig:
     """Application configuration with validation."""
     
+    '''
+    Python automatically generates an __init__:
+        def __init__(self, dataset_path=Path("datasets"), etc):
+            self.dataset_path = dataset_path
+            etc
+
+    - assigns values
+    - does no validation
+    - does no type conversion
+    - does no side effects (like creating folders
+    '''
     # Dataset settings
     dataset_path: Path = Path("datasets")
     categories: List[str] = field(default_factory=lambda: ["sky", "ocean", "umbrella", "dog", "book"])
@@ -26,7 +37,7 @@ class AppConfig:
     epochs: int = 10
     valid_pct: float = 0.2
     resize_size: int = 192
-    seed: int = 42  # For reproducibility
+    seed: int = 42
     
     # Model settings
     model_path: Path = Path("models/classifier.pkl")
@@ -47,7 +58,26 @@ class AppConfig:
     
     def __post_init__(self):
         """Validate configuration."""
-        # Convert paths
+
+        '''
+        __post_init__ is the official hook that runs after dataclass 
+        initialisation, giving you a place to:
+
+        - validate fields
+        - convert input types
+        - compute derived values
+        - initialise directories
+        - prevent invalid configurations
+
+        It is the only safe way to add logic after the dataclass has done its field 
+        assignment.
+        '''
+        # Convert String, etc paths to Path paths
+        '''
+        If someone passes a string:
+            AppConfig(dataset_path="mydata")
+        it becomes a Path("mydata").
+        '''
         self.dataset_path = Path(self.dataset_path)
         self.model_path = Path(self.model_path)
         
@@ -67,11 +97,11 @@ class AppConfig:
         if self.epochs <= 0:
             raise ValueError("epochs must be positive")
         
-        # Create directories
+        # Create directory for the model file
         self.model_path.parent.mkdir(parents=True, exist_ok=True)
     
     @classmethod
-    def from_yaml(cls, path: Path) -> 'AppConfig':
+    def from_yaml(cls, path: Path) -> 'AppConfig': # To call: config = AppConfig.from_yaml("config.yaml")
         """Load configuration from YAML file."""
         with open(path) as f:
             data = yaml.safe_load(f)
@@ -87,6 +117,16 @@ class AppConfig:
     @classmethod
     def from_env(cls) -> 'AppConfig':
         """Load configuration from environment variables."""
+
+        '''
+        Loads configuration from environment variables such as:
+        DATASET_PATH
+        IMAGES_PER_CATEGORY
+        EPOCHS
+        etc.
+
+        Fallbacks are provided if environment variables are missing.
+        '''
         return cls(
             dataset_path=Path(os.getenv('DATASET_PATH', 'datasets')),
             categories=os.getenv('CATEGORIES', 'cat,dog,bird').split(','),
