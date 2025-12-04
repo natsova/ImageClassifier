@@ -1,0 +1,109 @@
+# ============================================================
+# frameworks/di/container.py
+# ============================================================
+"""Dependency injection container - wires everything together."""
+
+from frameworks.config.app_config import AppConfig
+from interface_adapters.repositories.dataset_repo_fs import DatasetRepositoryFS
+from interface_adapters.repositories.model_repo_fs import ModelRepositoryFS
+from interface_adapters.downloaders.bing_downloader import BingDownloader
+from interface_adapters.processors.image_processor_pillow import ImageProcessorPillow
+from interface_adapters.dataloader.fastai_dataloader import FastAIDataLoader
+from interface_adapters.model.fastai_model_adapter import FastAIModelAdapter
+from domain.services.dataset_service import DatasetService
+from domain.services.model_service import ModelService
+from use_cases.dataset.prepare_dataset import PrepareDatasetUseCase
+from use_cases.dataset.validate_dataset import ValidateDatasetUseCase
+from use_cases.training.train_model import TrainModelUseCase
+from use_cases.inference.predict_image import PredictImageUseCase
+from pathlib import Path
+from interface_adapters.logging.python_logger import PythonLogger
+from interface_adapters.repositories.model_repo_fs import ModelRepositoryFS
+
+logger = PythonLogger(name="model_repo")
+model_repo = ModelRepositoryFS(
+    base_path=Path("models"),
+    logger=logger
+)
+
+class Container:
+    """Dependency injection container."""
+    
+    def __init__(self, config: AppConfig):
+        self.config = config
+
+        # Logger
+        self.logger = PythonLogger(name="container")
+
+        # Repositories
+        self.image_repo = DatasetRepositoryFS(
+            base_path=config.dataset_path,
+            logger=self.logger
+        )
+        self.model_repo = ModelRepositoryFS(
+            base_path=Path("models"),
+            logger=self.logger
+        )
+
+        # Adapters
+        self.downloader = BingDownloader(
+            logger=self.logger,
+            sleep_time=config.sleep_time,
+            timeout=config.download_timeout
+        )
+        self.processor = ImageProcessorPillow(logger=self.logger)
+
+        # Services
+        self.dataset_service = DatasetService(self.image_repo)
+        self.model_service = ModelService(self.model_repo)
+
+        # lazy-loaded
+        self._dataloader = None
+        self._model_adapter = None
+
+        # Use cases
+        self.prepare_dataset_uc = PrepareDatasetUseCase(
+            dataset_service=self.dataset_service,
+            repository=self.image_repo,
+            downloader=self.downloader,
+            processor=self.processor,
+            logger=self.logger
+        )
+
+        self.validate_dataset_uc = ValidateDatasetUseCase(
+            dataset_service=self.dataset_service,
+            processor=self.processor,
+            logger=self.logger
+        )
+
+        # Important: DO NOT create a model yet
+        self.train_model_uc = TrainModelUseCase(
+            model_service=self.model_service,
+            dataloader_factory=self.get_dataloader,
+            model_adapter_factory=self.get_model_adapter,
+            logger=self.logger
+        )
+
+        self.predict_image_uc = PredictImageUseCase(
+            model=self.get_model_adapter(),
+            processor=self.processor,
+            logger=self.logger
+        )
+    
+    def get_dataloader(self) -> FastAIDataLoader:
+        """Lazy load dataloader."""
+        if self._dataloader is None:
+            self._dataloader = FastAIDataLoader(self.config.dataset_path)
+        return self._dataloader
+    
+    def get_model_adapter(self) -> FastAIModelAdapter:
+        """Lazy load model adapter with dataloader."""
+        if self._model_adapter is None:
+            dataloader = self.get_dataloader()
+            dls = dataloader.create_dataloader(
+                batch_size=self.config.batch_size,
+                valid_pct=self.config.valid_pct,
+                resize_size=self.config.resize_size
+            )
+            self._model_adapter = FastAIModelAdapter(dls)
+        return self._model_adapter
