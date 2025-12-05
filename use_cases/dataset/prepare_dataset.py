@@ -19,7 +19,7 @@ class PrepareDatasetUseCase:
     Use case to prepare dataset:
     - create folders per category
     - download images
-    - process (normalize, resize)
+    - process (normalise, resize)
     - save to repository
     """
 

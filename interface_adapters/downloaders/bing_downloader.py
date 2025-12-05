@@ -28,18 +28,24 @@ class BingDownloader(ImageDownloader):
         sleep_time: int = 2,
         timeout: int = 30,
         max_retries: int = 3,
-        use_modifiers: bool = True
+        max_refill_rounds: int = 5,
+        remove_duplicates: bool = True,
+        use_modifiers: bool = True,
     ):
         self.logger = logger
         self.sleep_time = sleep_time
         self.timeout = timeout
         self.max_retries = max_retries
+        self.max_refill_rounds = max_refill_rounds
+        self.remove_duplicates = remove_duplicates
         self.use_modifiers = use_modifiers
         
         self._modifiers = [
             "high quality", "hdr", "aesthetic", "macro", "film",
             "close up", "dawn", "dusk", "natural light", "4k"
         ]
+    
+    # PUBLIC API
     
     def search_and_download(
         self,

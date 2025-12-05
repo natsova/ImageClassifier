@@ -50,7 +50,7 @@ class AppConfig:
     download_timeout: int = 30
     max_refill_rounds: int = 5
     max_retries: int = 3
-    use_query_modifiers: bool = True
+    use_modifiers: bool = True
     
     # Performance settings
     num_workers: int = 4  # For parallel processing

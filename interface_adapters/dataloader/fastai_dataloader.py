@@ -10,9 +10,7 @@ from fastai.vision.all import (
 )
 
 
-class FastAIDataLoader:
-    """Creates FastAI dataloaders - matches your original implementation."""
-    
+class FastAIDataLoader:  
     def __init__(self, dataset_path: Path):
         self.dataset_path = Path(dataset_path)
     
@@ -22,11 +20,7 @@ class FastAIDataLoader:
         valid_pct: float = 0.2,
         resize_size: int = 192
     ):
-        """
-        Create and return a FastAI DataLoader.
 
-        Raises a clear error if dataset is empty or incorrectly structured.
-        """
         # Check if dataset path exists
         if not self.dataset_path.exists():
             raise FileNotFoundError(f"Dataset path not found: {self.dataset_path}")
@@ -47,10 +41,8 @@ class FastAIDataLoader:
                 f"No category subfolders found in {self.dataset_path}. "
                 "Create one subfolder per category with images inside."
             )
-        """
-        Create and return FastAI DataLoader.
-        Based on your create_dataloader function.
-        """
+        
+        # Create and return FastAI DataLoader.
         dls = DataBlock(
             blocks=(ImageBlock, CategoryBlock),
             get_items=get_image_files,
@@ -62,7 +54,6 @@ class FastAIDataLoader:
         return dls
     
     def check_dataloader(self, dls) -> dict:
-        """Check dataloader stats - based on your check_datasets function."""
         all_files = get_image_files(self.dataset_path)
         
         stats = {

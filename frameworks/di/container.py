@@ -1,7 +1,7 @@
 # ============================================================
 # frameworks/di/container.py
 # ============================================================
-"""Dependency injection container - wires everything together."""
+"""Dependency injection container"""
 
 from frameworks.config.app_config import AppConfig
 from interface_adapters.repositories.dataset_repo_fs import DatasetRepositoryFS
@@ -18,8 +18,6 @@ from use_cases.training.train_model import TrainModelUseCase
 from use_cases.inference.predict_image import PredictImageUseCase
 from pathlib import Path
 from interface_adapters.logging.python_logger import PythonLogger
-from interface_adapters.repositories.model_repo_fs import ModelRepositoryFS
-
 
 class Container:
     """Dependency injection container."""
@@ -45,7 +43,11 @@ class Container:
         self.downloader = BingDownloader(
             logger=self.logger,
             sleep_time=config.sleep_time,
-            timeout=config.download_timeout
+            timeout=config.download_timeout,
+            remove_duplicates=config.remove_duplicates,
+            max_refill_rounds=config.max_refill_rounds,
+            max_retries=config.max_retries,
+            use_modifiers=config.use_modifiers
         )
         self.processor = ImageProcessorPillow(logger=self.logger) # Handles image resizing, format conversion, etc. 
 
@@ -86,7 +88,7 @@ class Container:
         )
         # Use case
         self.predict_image_uc = PredictImageUseCase(
-            model=self.get_model_adapter(),
+            model=self.get_model_adapter, # Passes the function, not the object.
             processor=self.processor,
             logger=self.logger
         )
