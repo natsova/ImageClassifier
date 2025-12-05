@@ -25,3 +25,11 @@ class DatasetService:
             cat = img.category
             distribution[cat] = distribution.get(cat, 0) + 1
         return distribution
+    
+    def list_categories(self) -> list:
+        """Return list of unique category names in the dataset."""
+        return list(self.compute_category_distribution().keys())
+
+    def get_images_by_category(self, category_name: str) -> list:
+        """Return all images in a given category."""
+        return [img for img in self.get_images() if img.category == category_name]
