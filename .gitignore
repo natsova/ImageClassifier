@@ -1,6 +1,9 @@
 # Downloaded images
 datasets/
 
+# Downloaded models
+models/
+
 # Python cache and compiled files
 __pycache__/
 *.pyc
