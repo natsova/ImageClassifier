@@ -11,25 +11,23 @@ from typing import Dict, Any
 class TrainingMetrics:
     """Immutable representation of model training metrics."""
     
-    metrics: Dict[str, float]
+    epoch: int
+    train_loss: float
+    valid_loss: float
+    error_rate: float
 
-    def __post_init__(self):
-        # Ensure all values are floats between 0 and 1
-        for name, value in self.metrics.items():
-            if not isinstance(value, (float, int)):
-                raise TypeError(f"Metric '{name}' must be a number, got {type(value)}")
-            if not 0.0 <= value <= 1.0:
-                raise ValueError(f"Metric '{name}' must be between 0 and 1, got {value}")
-
-    def get(self, metric_name: str) -> float:
-        """Get a metric by name."""
-        if metric_name not in self.metrics:
-            raise KeyError(f"Metric '{metric_name}' not found")
-        return self.metrics[metric_name]
-
-    def as_dict(self) -> Dict[str, float]:
-        """Return metrics as a plain dictionary."""
-        return dict(self.metrics)
+    def as_dict(self):
+        return {
+            "epoch": self.epoch,
+            "train_loss": self.train_loss,
+            "valid_loss": self.valid_loss,
+            "error_rate": self.error_rate
+        }
 
     def __str__(self):
-        return ", ".join(f"{k}: {v:.4f}" for k, v in self.metrics.items())
+        return (
+            f"Epoch {self.epoch}: "
+            f"train_loss={self.train_loss:.4f}, "
+            f"valid_loss={self.valid_loss:.4f}, "
+            f"error_rate={self.error_rate:.4f}"
+        )
