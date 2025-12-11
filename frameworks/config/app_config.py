@@ -29,7 +29,7 @@ class AppConfig:
     # Dataset settings
     dataset_path: Path = Path("datasets")
     categories: List[str] = field(default_factory=lambda: ["sky", "ocean", "umbrella", "dog", "book"])
-    images_per_category: int = 150
+    images_per_category: int = 200
     images_per_search: int = 50
     
     # Training settings

@@ -41,7 +41,7 @@ class PredictImageUseCase:
         for path in image_paths:
             try:
                 # Step 1: Wrap path in ImageItem and preprocess
-                img_item = ImageItem(file_path=path, category=None)
+                img_item = ImageItem(file_path=path, category=Category("unknown"))
                 img_item = self.processor.normalize(img_item)
 
                 # Step 2: Predict category

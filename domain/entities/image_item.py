@@ -6,7 +6,7 @@ Pure data model with no framework or I/O logic.
 
 from dataclasses import dataclass
 from pathlib import Path
-
+from domain.entities.category import Category
 
 @dataclass(frozen=True)
 class ImageItem:

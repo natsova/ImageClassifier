@@ -10,7 +10,7 @@ from domain.interfaces.logger import Logger
 from domain.entities.image_item import ImageItem
 from PIL import Image
 import shutil
-
+from domain.entities.category import Category
 
 class ImageProcessorPillow(ImageProcessor):
     """Enhanced processor that returns new files instead of mutating."""

@@ -83,12 +83,13 @@ class PrepareDatasetUseCase:
 
             # Process and save valid images
             valid_count = 0
+            category_obj = category
             for path in downloaded_paths:
                 if self.processor.validate_and_convert(path):
-                    image_item = ImageItem(file_path=path, category=cat_name)
+                    image_item = ImageItem(file_path=path, category=category_obj)
                     image_item = self.processor.normalize(image_item)
                     image_item = self.processor.resize(image_item, (192, 192))
-                    self.repository.save(image_item, category)
+                    self.repository.save(image_item, category_obj)
                     valid_count += 1
                 else:
                     corrupted_removed += 1

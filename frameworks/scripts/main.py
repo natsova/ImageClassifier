@@ -54,20 +54,20 @@ def main():
     #     print("Some images are invalid. Consider cleaning dataset before training.\n")
 
     # 5. Create dataloader
-    # print("STEP 3: Creating dataloader...")
-    # print("-" * 70)
-    # dataloader = container.get_dataloader()
-    # dls = dataloader.create_dataloader(
-    #     batch_size=config.batch_size,
-    #     valid_pct=config.valid_pct,
-    #     resize_size=config.resize_size
-    # )
+    print("STEP 3: Creating dataloader...")
+    print("-" * 70)
+    dataloader = container.get_dataloader()
+    dls = dataloader.create_dataloader(
+        batch_size=config.batch_size,
+        valid_pct=config.valid_pct,
+        resize_size=config.resize_size
+    )
 
-    # stats = dataloader.check_dataloader(dls)
-    # print(f"Total image files: {stats['total_files']}")
-    # print(f"Train dataset size: {stats['train_size']}")
-    # print(f"Validation dataset size: {stats['valid_size']}")
-    # print(f"Categories: {', '.join(stats['vocab'])}\n")
+    stats = dataloader.check_dataloader(dls)
+    print(f"Total image files: {stats['total_files']}")
+    print(f"Train dataset size: {stats['train_size']}")
+    print(f"Validation dataset size: {stats['valid_size']}")
+    print(f"Categories: {', '.join(stats['vocab'])}\n")
 
     # 6. Build model
     print("STEP 4: Building model...")

@@ -11,11 +11,13 @@ from fastai.vision.all import (
 from domain.value_objects.training_metrics import TrainingMetrics
 from typing import List
 import matplotlib.pyplot as plt
-
+from PIL import ImageFile
 
 class FastAIModelAdapter:
     """Adapter for FastAI model operations - based on your code."""
     
+    ImageFile.LOAD_TRUNCATED_IMAGES = True
+
     def __init__(self, dataloader):
         self.dataloader = dataloader
         self.learner = None

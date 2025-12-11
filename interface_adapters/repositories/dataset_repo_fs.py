@@ -44,10 +44,12 @@ class DatasetRepositoryFS:
             for category_dir in self.base_path.iterdir():
                 if not category_dir.is_dir() or category_dir.name.startswith(('temp', '.')):
                     continue
+
+                category = Category(category_dir.name)
                 
                 for img_path in category_dir.iterdir():
                     if img_path.suffix.lower() in self.SUPPORTED_EXTENSIONS:
-                        images.append(ImageItem(img_path, category_dir.name))
+                        images.append(ImageItem(img_path, category))
             
             self.logger.info(f"Loaded {len(images)} images")
             return images
@@ -67,7 +69,7 @@ class DatasetRepositoryFS:
         images = []
         for img_path in category_path.iterdir():
             if img_path.suffix.lower() in self.SUPPORTED_EXTENSIONS:
-                images.append(ImageItem(img_path, category.name))
+                images.append(ImageItem(img_path, category))
         
         return images
     

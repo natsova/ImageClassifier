@@ -49,7 +49,6 @@ class ValidateDatasetUseCase:
         self.logger.info(f"Found categories: {categories}")
 
         for cat_name in categories:
-            category = Category(name=cat_name)
             images = self.dataset_service.get_images_by_category(cat_name)
             total_images += len(images)
 
